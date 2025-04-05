@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   SafeAreaView,
@@ -11,21 +10,39 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import styles from './styles';
+import AuthService from '../../services/AuthService';
 
 const ForgotPassword = ({ navigation }) => {
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = () => {
-    // Here you would implement actual password reset logic
-    Alert.alert(
-      "Şifre Sıfırlama",
-      "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.",
-      [
-        { text: "Tamam", onPress: () => navigation.navigate('Login') }
-      ]
-    );
+  const handleResetPassword = async () => {
+    if (!email) {
+      Alert.alert('Hata', 'Lütfen e-posta adresinizi girin.');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const result = await AuthService.resetPassword(email);
+      
+      if (result.success) {
+        Alert.alert('Şifre Sıfırlama', result.message, [
+          { text: 'Tamam', onPress: () => navigation.navigate('Login') }
+        ]);
+      } else {
+        Alert.alert('Hata', result.error);
+      }
+    } catch (error) {
+      Alert.alert('Hata', error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,8 +86,13 @@ const ForgotPassword = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.submitButton}
                 onPress={handleResetPassword}
+                disabled={loading}
               >
-                <Text style={styles.submitButtonText}>ŞİFREMİ SIFIRLA</Text>
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text style={styles.submitButtonText}>ŞİFREMİ SIFIRLA</Text>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -86,89 +108,5 @@ const ForgotPassword = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  background: {
-    flex: 1,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 30,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 15,
-  },
-  appName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  formContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 30,
-  },
-  headerText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  instructionText: {
-    color: 'white',
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 20,
-    color: 'white',
-    fontSize: 16,
-  },
-  submitButton: {
-    backgroundColor: '#ff5722',
-    borderRadius: 30,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  submitButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  backButton: {
-    alignItems: 'center',
-  },
-  backButtonText: {
-    color: 'white',
-    fontSize: 14,
-  },
-});
 
 export default ForgotPassword;

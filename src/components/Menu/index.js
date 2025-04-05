@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import icons from '../../assets/icons';
-import style from '../../screens/Start/style';
+import style from '../../screens/Start/styles';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 const windowWidth = Dimensions.get('window').width;
 
